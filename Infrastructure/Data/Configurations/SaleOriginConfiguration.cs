@@ -16,5 +16,9 @@ public sealed class SaleOriginConfiguration : IEntityTypeConfiguration<SaleOrigi
 
         entity.HasIndex(e => e.Name)
             .IsUnique();
+
+        entity.HasData(
+            new { Id = 1, Name = "Manual" },
+            new { Id = 2, Name = "Chatbot" });
     }
 }

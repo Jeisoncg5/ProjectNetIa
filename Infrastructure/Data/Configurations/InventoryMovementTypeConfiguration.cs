@@ -16,5 +16,11 @@ public sealed class InventoryMovementTypeConfiguration : IEntityTypeConfiguratio
 
         entity.HasIndex(e => e.Name)
             .IsUnique();
+
+        entity.HasData(
+            new { Id = 1, Name = "InitialStock" },
+            new { Id = 2, Name = "ManualAdjustment" },
+            new { Id = 3, Name = "Sale" },
+            new { Id = 4, Name = "Return" });
     }
 }

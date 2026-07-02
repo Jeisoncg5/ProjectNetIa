@@ -16,5 +16,11 @@ public sealed class CustomerDocumentTypeConfiguration : IEntityTypeConfiguration
 
         entity.HasIndex(e => e.Name)
             .IsUnique();
+
+        entity.HasData(
+            new { Id = 1, Name = "CC" },
+            new { Id = 2, Name = "CE" },
+            new { Id = 3, Name = "NIT" },
+            new { Id = 4, Name = "Passport" });
     }
 }

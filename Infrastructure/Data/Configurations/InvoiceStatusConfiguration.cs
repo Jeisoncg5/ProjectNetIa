@@ -16,5 +16,9 @@ public sealed class InvoiceStatusConfiguration : IEntityTypeConfiguration<Invoic
 
         entity.HasIndex(e => e.Name)
             .IsUnique();
+
+        entity.HasData(
+            new { Id = 1, Name = "Issued" },
+            new { Id = 2, Name = "Cancelled" });
     }
 }

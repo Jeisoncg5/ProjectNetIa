@@ -19,5 +19,15 @@ public sealed class ProductCategoryConfiguration : IEntityTypeConfiguration<Prod
 
         entity.HasIndex(e => e.Name)
             .IsUnique();
+
+        entity.HasData(
+            new { Id = 1, Name = "Camisetas", Description = "Camisetas y tops casuales", IsActive = true },
+            new { Id = 2, Name = "Camisas", Description = "Camisas formales e informales", IsActive = true },
+            new { Id = 3, Name = "Pantalones", Description = "Pantalones de uso diario", IsActive = true },
+            new { Id = 4, Name = "Jeans", Description = "Jeans y prendas denim", IsActive = true },
+            new { Id = 5, Name = "Chaquetas", Description = "Chaquetas y prendas exteriores", IsActive = true },
+            new { Id = 6, Name = "Vestidos", Description = "Vestidos y enterizos", IsActive = true },
+            new { Id = 7, Name = "Zapatos", Description = "Calzado", IsActive = true },
+            new { Id = 8, Name = "Accesorios", Description = "Complementos y accesorios", IsActive = true });
     }
 }

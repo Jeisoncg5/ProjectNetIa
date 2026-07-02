@@ -16,5 +16,10 @@ public sealed class SaleStatusConfiguration : IEntityTypeConfiguration<SaleStatu
 
         entity.HasIndex(e => e.Name)
             .IsUnique();
+
+        entity.HasData(
+            new { Id = 1, Name = "Pending" },
+            new { Id = 2, Name = "Completed" },
+            new { Id = 3, Name = "Cancelled" });
     }
 }
