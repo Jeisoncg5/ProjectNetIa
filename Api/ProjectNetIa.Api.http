@@ -1,0 +1,6 @@
+@ProjectNetIa.Api_HostAddress = http://localhost:5083
+
+GET {{ProjectNetIa.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
