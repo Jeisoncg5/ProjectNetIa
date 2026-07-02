@@ -4,7 +4,7 @@ public sealed class Inventory
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public Guid ProductId { get; set; }
+    public Guid ProductVariantId { get; set; }
 
     public int Quantity { get; set; }
 
@@ -12,5 +12,5 @@ public sealed class Inventory
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public Product? Product { get; set; }
+    public ProductVariant? ProductVariant { get; set; }
 }

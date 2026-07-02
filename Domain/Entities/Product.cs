@@ -20,9 +20,5 @@ public sealed class Product
 
     public ProductCategory? ProductCategory { get; set; }
 
-    public Inventory? Inventory { get; set; }
-
-    public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
-
-    public ICollection<InventoryMovement> InventoryMovements { get; set; } = new List<InventoryMovement>();
+    public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
 }

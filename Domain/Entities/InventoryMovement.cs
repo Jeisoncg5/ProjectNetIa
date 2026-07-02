@@ -4,7 +4,7 @@ public sealed class InventoryMovement
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public Guid ProductId { get; set; }
+    public Guid ProductVariantId { get; set; }
 
     public int InventoryMovementTypeId { get; set; }
 
@@ -14,7 +14,7 @@ public sealed class InventoryMovement
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public Product? Product { get; set; }
+    public ProductVariant? ProductVariant { get; set; }
 
     public InventoryMovementType? InventoryMovementType { get; set; }
 }

@@ -6,7 +6,7 @@ public sealed class SaleItem
 
     public Guid SaleId { get; set; }
 
-    public Guid ProductId { get; set; }
+    public Guid ProductVariantId { get; set; }
 
     public int Quantity { get; set; }
 
@@ -14,5 +14,5 @@ public sealed class SaleItem
 
     public Sale? Sale { get; set; }
 
-    public Product? Product { get; set; }
+    public ProductVariant? ProductVariant { get; set; }
 }
