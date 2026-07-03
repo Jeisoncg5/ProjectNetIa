@@ -11,4 +11,11 @@ public interface IProductService
     Task<IReadOnlyList<ProductResponse>> GetProductsAsync();
 
     Task<ProductResponse?> GetProductByIdAsync(Guid id);
+
+    Task<IReadOnlyList<ProductVariantSearchResponse>> SearchProductVariantsAsync(
+        string? query,
+        string? size,
+        string? color,
+        bool onlyAvailable
+    );
 }

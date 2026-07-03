@@ -268,6 +268,81 @@ public sealed class ProductService : IProductService
             .FirstOrDefaultAsync();
     }
 
+    public async Task<IReadOnlyList<ProductVariantSearchResponse>> SearchProductVariantsAsync(
+        string? query,
+        string? size,
+        string? color,
+        bool onlyAvailable)
+    {
+        var normalizedQuery = query?.Trim().ToLower();
+        var normalizedSize = size?.Trim().ToLower();
+        var normalizedColor = color?.Trim().ToLower();
+
+        var variantsQuery = _context.ProductVariants
+            .AsNoTracking()
+            .Include(variant => variant.Product)
+                .ThenInclude(product => product!.ProductCategory)
+            .Include(variant => variant.Size)
+            .Include(variant => variant.Color)
+            .Include(variant => variant.Inventory)
+            .Where(variant =>
+                variant.IsActive &&
+                variant.Product != null &&
+                variant.Product.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(normalizedQuery))
+        {
+            variantsQuery = variantsQuery.Where(variant =>
+                variant.Product!.Name.ToLower().Contains(normalizedQuery) ||
+                (variant.Product.Description != null &&
+                 variant.Product.Description.ToLower().Contains(normalizedQuery)) ||
+                variant.Sku.ToLower().Contains(normalizedQuery));
+        }
+
+        if (!string.IsNullOrWhiteSpace(normalizedSize))
+        {
+            variantsQuery = variantsQuery.Where(variant =>
+                variant.Size != null &&
+                variant.Size.Name.ToLower() == normalizedSize);
+        }
+
+        if (!string.IsNullOrWhiteSpace(normalizedColor))
+        {
+            variantsQuery = variantsQuery.Where(variant =>
+                variant.Color != null &&
+                variant.Color.Name.ToLower() == normalizedColor);
+        }
+
+        if (onlyAvailable)
+        {
+            variantsQuery = variantsQuery.Where(variant =>
+                variant.Inventory != null &&
+                variant.Inventory.Quantity > 0);
+        }
+
+        return await variantsQuery
+            .OrderBy(variant => variant.Product!.Name)
+            .ThenBy(variant => variant.Color!.Name)
+            .ThenBy(variant => variant.Size!.Name)
+            .Select(variant => new ProductVariantSearchResponse
+            {
+                ProductVariantId = variant.Id,
+                ProductId = variant.ProductId,
+                ProductName = variant.Product != null ? variant.Product.Name : string.Empty,
+                Description = variant.Product != null ? variant.Product.Description : null,
+                CategoryName = variant.Product != null && variant.Product.ProductCategory != null
+                    ? variant.Product.ProductCategory.Name
+                    : string.Empty,
+                Sku = variant.Sku,
+                SizeName = variant.Size != null ? variant.Size.Name : string.Empty,
+                ColorName = variant.Color != null ? variant.Color.Name : string.Empty,
+                Price = variant.Product != null ? variant.Product.Price : 0,
+                Quantity = variant.Inventory != null ? variant.Inventory.Quantity : 0,
+                IsAvailable = variant.Inventory != null && variant.Inventory.Quantity > 0
+            })
+            .ToListAsync();
+    }
+
     private async Task<ProductVariantResponse?> GetProductVariantByIdAsync(Guid id)
     {
         return await _context.ProductVariants

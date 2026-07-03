@@ -22,6 +22,23 @@ public sealed class ProductsController : ControllerBase
         return Ok(products);
     }
 
+    [HttpGet("variants/search")]
+    public async Task<IActionResult> SearchProductVariants(
+        [FromQuery] string? query,
+        [FromQuery] string? size,
+        [FromQuery] string? color,
+        [FromQuery] bool onlyAvailable = true)
+    {
+        var variants = await _productService.SearchProductVariantsAsync(
+            query,
+            size,
+            color,
+            onlyAvailable
+        );
+
+        return Ok(variants);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetProductById(Guid id)
     {
