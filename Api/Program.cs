@@ -13,6 +13,10 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
+builder.Services.AddHttpClient<IChatService, ChatService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8000");
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
