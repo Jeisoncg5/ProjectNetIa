@@ -11,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ISaleService, SaleService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
