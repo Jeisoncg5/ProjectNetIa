@@ -20,6 +20,16 @@ builder.Services.AddHttpClient<IChatService, ChatService>(client =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173", "http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -32,6 +42,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("ReactPolicy");
 app.MapControllers();
 app.MapGet("/", () => Results.Ok(new { message = "ProjectNetIa API running" }));
 
