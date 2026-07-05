@@ -274,11 +274,11 @@ public sealed class ProductService : IProductService
         string? color,
         bool onlyAvailable)
     {
-        var normalizedQuery = query?.Trim().ToLower();
-        var normalizedSize = size?.Trim().ToLower();
-        var normalizedColor = color?.Trim().ToLower();
+        var normalizedQuery = query?.Trim();
+        var normalizedSize = size?.Trim();
+        var normalizedColor = color?.Trim();
 
-        var variantsQuery = _context.ProductVariants
+        IQueryable<ProductVariant> variantsQuery = _context.ProductVariants
             .AsNoTracking()
             .Include(variant => variant.Product)
                 .ThenInclude(product => product!.ProductCategory)
@@ -292,32 +292,44 @@ public sealed class ProductService : IProductService
 
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
+            var pattern = $"%{normalizedQuery}%";
+
             variantsQuery = variantsQuery.Where(variant =>
-                variant.Product!.Name.ToLower().Contains(normalizedQuery) ||
-                (variant.Product.Description != null &&
-                 variant.Product.Description.ToLower().Contains(normalizedQuery)) ||
-                variant.Sku.ToLower().Contains(normalizedQuery));
+                EF.Functions.ILike(variant.Product!.Name, pattern) ||
+                (
+                    variant.Product.Description != null &&
+                    EF.Functions.ILike(variant.Product.Description, pattern)
+                ) ||
+                (
+                    variant.Product.ProductCategory != null &&
+                    EF.Functions.ILike(variant.Product.ProductCategory.Name, pattern)
+                ) ||
+                EF.Functions.ILike(variant.Sku, pattern)
+            );
         }
 
         if (!string.IsNullOrWhiteSpace(normalizedSize))
         {
             variantsQuery = variantsQuery.Where(variant =>
                 variant.Size != null &&
-                variant.Size.Name.ToLower() == normalizedSize);
+                EF.Functions.ILike(variant.Size.Name, normalizedSize)
+            );
         }
 
         if (!string.IsNullOrWhiteSpace(normalizedColor))
         {
             variantsQuery = variantsQuery.Where(variant =>
                 variant.Color != null &&
-                variant.Color.Name.ToLower() == normalizedColor);
+                EF.Functions.ILike(variant.Color.Name, normalizedColor)
+            );
         }
 
         if (onlyAvailable)
         {
             variantsQuery = variantsQuery.Where(variant =>
                 variant.Inventory != null &&
-                variant.Inventory.Quantity > 0);
+                variant.Inventory.Quantity > 0
+            );
         }
 
         return await variantsQuery
