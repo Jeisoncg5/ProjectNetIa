@@ -4,6 +4,41 @@
 
 ProjectNetIa - Tienda de ropa con inventario inteligente y chatbot de ventas.
 
+## Estado actual en este repositorio
+
+El repositorio ya incluye:
+
+- Backend ASP.NET Core que expone los endpoints de negocio.
+- Cliente .NET configurable para hablar con FastAPI usando `Chatbot:BaseUrl`.
+- Un servicio base de FastAPI en `FastApiChatbot/` con el endpoint `POST /chat/message`.
+
+### Configuracion usada en desarrollo
+
+- .NET: `http://localhost:5083` o `https://localhost:7221`
+- FastAPI: `http://localhost:8000`
+
+Para levantar FastAPI revisa `FastApiChatbot/README.md`.
+
+## Arranque unificado
+
+Desde este repositorio ya puedes levantar ambos servicios con:
+
+```powershell
+.\Scripts\Start-IntegratedStack.ps1
+```
+
+El script:
+
+- inicia `ProjectNetIa` en `http://localhost:5083`
+- inicia `smartinventory-ai-core-main` en `http://127.0.0.1:8000`
+- espera a que ambos health checks respondan
+
+Para apagarlos:
+
+```powershell
+.\Scripts\Stop-IntegratedStack.ps1
+```
+
 ## Rol de la API .NET
 
 La API en ASP.NET Core es el backend principal del negocio. Se encarga de:

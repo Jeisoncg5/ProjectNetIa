@@ -4,6 +4,18 @@ obj/
 out/
 TestResults/
 
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.venv/
+venv/
+
 # .NET user-specific files
 *.rsuser
 *.suo
@@ -23,6 +35,7 @@ packages/
 
 # Logs
 *.log
+*.pid
 
 # Local database / cache files
 *.db
@@ -33,6 +46,7 @@ packages/
 .env
 .env.*
 secrets.json
+.python-version
 
 # OS files
 Thumbs.db

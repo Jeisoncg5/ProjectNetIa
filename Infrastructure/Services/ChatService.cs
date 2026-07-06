@@ -25,11 +25,31 @@ public sealed class ChatService : IChatService
             throw new InvalidOperationException("El mensaje es obligatorio.");
         }
 
-        var response = await _httpClient.PostAsJsonAsync("/chat/message", request);
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await _httpClient.PostAsJsonAsync("/chat/message", request);
+        }
+        catch (HttpRequestException exception)
+        {
+            throw new InvalidOperationException(
+                $"No fue posible conectarse con FastAPI: {exception.Message}");
+        }
+        catch (TaskCanceledException)
+        {
+            throw new InvalidOperationException("FastAPI tardo demasiado en responder.");
+        }
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new InvalidOperationException("Error comunicandose con el servicio de chatbot en FastAPI.");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            var normalizedContent = string.IsNullOrWhiteSpace(errorContent)
+                ? "Sin detalle adicional."
+                : errorContent;
+
+            throw new InvalidOperationException(
+                $"FastAPI respondio con {(int)response.StatusCode}: {normalizedContent}");
         }
 
         var chatbotResponse = await response.Content.ReadFromJsonAsync<ChatMessageResponse>();

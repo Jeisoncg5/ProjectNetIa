@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using ProjectNetIa.Api.Configuration;
 using ProjectNetIa.Application.Interfaces;
 using ProjectNetIa.Infrastructure.Data;
 using ProjectNetIa.Infrastructure.Services;
@@ -14,9 +16,21 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
-builder.Services.AddHttpClient<IChatService, ChatService>(client =>
+builder.Services.Configure<ChatbotOptions>(
+    builder.Configuration.GetSection(ChatbotOptions.SectionName));
+builder.Services.AddHttpClient<IChatService, ChatService>((serviceProvider, client) =>
 {
-    client.BaseAddress = new Uri("http://localhost:8000");
+    var options = serviceProvider
+        .GetRequiredService<IOptions<ChatbotOptions>>()
+        .Value;
+
+    if (!Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var baseUri))
+    {
+        throw new InvalidOperationException("La URL base del chatbot no es valida.");
+    }
+
+    client.BaseAddress = baseUri;
+    client.Timeout = TimeSpan.FromSeconds(Math.Max(1, options.TimeoutSeconds));
 });
 
 builder.Services.AddControllers();
