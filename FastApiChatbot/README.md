@@ -27,6 +27,12 @@ La verificacion SSL viene desactivada para desarrollo local con el certificado d
 uvicorn app.main:app --reload --port 8000
 ```
 
+Tambien puedes levantar `.NET` + `FastAPI` juntos desde la raiz del repositorio:
+
+```powershell
+.\Scripts\Start-IntegratedStack.ps1
+```
+
 ## 4. Flujo disponible
 
 - Busca productos reales en `.NET` usando `GET /api/products/variants/search`.

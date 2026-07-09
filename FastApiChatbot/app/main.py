@@ -36,16 +36,20 @@ class SessionState:
 
 
 SESSIONS: dict[str, SessionState] = {}
-COLOR_HINTS = [
-    "negro",
-    "blanco",
-    "azul",
-    "rojo",
-    "verde",
-    "gris",
-    "amarillo",
-    "beige",
-]
+COLOR_ALIASES = {
+    "negro": "Negro",
+    "negra": "Negro",
+    "blanco": "Blanco",
+    "blanca": "Blanco",
+    "azul": "Azul",
+    "rojo": "Rojo",
+    "roja": "Rojo",
+    "verde": "Verde",
+    "gris": "Gris",
+    "amarillo": "Amarillo",
+    "amarilla": "Amarillo",
+    "beige": "Beige",
+}
 SIZE_HINTS = ["xs", "s", "m", "l", "xl", "xxl", "28", "30", "32", "34", "36", "38", "40"]
 CONFIRMATION_HINTS = {
     "si",
@@ -200,11 +204,11 @@ def contains_any(message: str, hints: set[str]) -> bool:
 def extract_purchase_intent(message: str) -> dict[str, str | int | None]:
     normalized = normalize_message(message)
     quantity = extract_quantity(normalized)
-    color = next((color.title() for color in COLOR_HINTS if color in normalized), None)
+    color = next((canonical for alias, canonical in COLOR_ALIASES.items() if alias in normalized), None)
     size = extract_size(normalized)
 
     clean_query = normalized
-    for token in COLOR_HINTS + SIZE_HINTS + ["talla", "quiero", "comprar", "una", "un", "unos", "unas", "de"]:
+    for token in list(COLOR_ALIASES.keys()) + SIZE_HINTS + ["talla", "quiero", "comprar", "una", "un", "unos", "unas", "de"]:
         clean_query = re.sub(rf"\b{re.escape(token)}\b", " ", clean_query)
 
     clean_query = re.sub(r"\b\d+\b", " ", clean_query)

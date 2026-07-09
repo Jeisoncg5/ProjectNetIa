@@ -11,6 +11,7 @@ El repositorio ya incluye:
 - Backend ASP.NET Core que expone los endpoints de negocio.
 - Cliente .NET configurable para hablar con FastAPI usando `Chatbot:BaseUrl`.
 - Un servicio base de FastAPI en `FastApiChatbot/` con el endpoint `POST /chat/message`.
+- Compatibilidad con un microservicio alternativo `smartinventory-ai-core-main`, que usa `LangChain` y `LangGraph`.
 
 ### Configuracion usada en desarrollo
 
@@ -18,6 +19,8 @@ El repositorio ya incluye:
 - FastAPI: `http://localhost:8000`
 
 Para levantar FastAPI revisa `FastApiChatbot/README.md`.
+
+Si quieres la variante alineada con el taller usando `LangChain/LangGraph`, revisa [LangChainLangGraphMigration.md](/C:/Users/Jeiso/OneDrive/Escritorio/ProjectNetIa/Docs/LangChainLangGraphMigration.md).
 
 ## Arranque unificado
 
@@ -30,7 +33,7 @@ Desde este repositorio ya puedes levantar ambos servicios con:
 El script:
 
 - inicia `ProjectNetIa` en `http://localhost:5083`
-- inicia `smartinventory-ai-core-main` en `http://127.0.0.1:8000`
+- inicia `FastApiChatbot` en `http://127.0.0.1:8000`
 - espera a que ambos health checks respondan
 
 Para apagarlos:

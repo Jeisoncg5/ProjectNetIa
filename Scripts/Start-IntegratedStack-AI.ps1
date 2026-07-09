@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$fastApiRoot = Join-Path $projectRoot "FastApiChatbot"
+$aiCoreRoot = Join-Path (Split-Path -Parent $projectRoot) "smartinventory-ai-core-main"
 $dotnetUrl = "http://localhost:5083/"
 $fastApiUrl = "http://127.0.0.1:8000/"
 $fastApiPort = 8000
@@ -50,19 +50,19 @@ if (-not (Test-Path -LiteralPath (Join-Path $projectRoot "Api\Api.csproj"))) {
     throw "No se encontro Api\Api.csproj. Ejecuta este script desde el repositorio ProjectNetIa."
 }
 
-if (-not (Test-Path -LiteralPath $fastApiRoot)) {
-    throw "No se encontro FastApiChatbot en $fastApiRoot."
+if (-not (Test-Path -LiteralPath $aiCoreRoot)) {
+    throw "No se encontro smartinventory-ai-core-main en $aiCoreRoot."
 }
 
-$fastApiVenv = Join-Path $fastApiRoot ".venv\Scripts\python.exe"
-$fastApiEnv = Join-Path $fastApiRoot ".env"
+$aiCoreVenv = Join-Path $aiCoreRoot ".venv\Scripts\python.exe"
+$aiCoreEnv = Join-Path $aiCoreRoot ".env"
 
-if (-not (Test-Path -LiteralPath $fastApiVenv)) {
-    throw "No se encontro el entorno virtual de FastApiChatbot en $fastApiVenv."
+if (-not (Test-Path -LiteralPath $aiCoreVenv)) {
+    throw "No se encontro el entorno virtual de smartinventory-ai-core-main en $aiCoreVenv."
 }
 
-if (-not (Test-Path -LiteralPath $fastApiEnv)) {
-    throw "No se encontro el archivo .env de FastApiChatbot en $fastApiEnv."
+if (-not (Test-Path -LiteralPath $aiCoreEnv)) {
+    throw "No se encontro el archivo .env de smartinventory-ai-core-main en $aiCoreEnv."
 }
 
 $dotnetRunning = $false
@@ -90,10 +90,10 @@ if ($fastApiPid) {
 }
 
 if (-not $fastApiRunning) {
-    Write-Host "Iniciando FastAPI..." -ForegroundColor Cyan
-    Start-Process -FilePath $fastApiVenv `
-        -ArgumentList "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8000" `
-        -WorkingDirectory $fastApiRoot `
+    Write-Host "Iniciando FastAPI con LangChain/LangGraph..." -ForegroundColor Cyan
+    Start-Process -FilePath $aiCoreVenv `
+        -ArgumentList "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000" `
+        -WorkingDirectory $aiCoreRoot `
         -WindowStyle Hidden | Out-Null
 } else {
     Write-Host "FastAPI ya estaba en ejecucion en el puerto 8000." -ForegroundColor Yellow
@@ -113,6 +113,6 @@ if (-not $fastApiHealthy) {
 }
 
 Write-Host "Servicios listos." -ForegroundColor Green
-Write-Host "  .NET API : $dotnetUrl" -ForegroundColor Yellow
-Write-Host "  FastAPI  : $fastApiUrl" -ForegroundColor Yellow
-Write-Host "  Chat .NET: http://localhost:5083/api/chat/message" -ForegroundColor Yellow
+Write-Host "  .NET API      : $dotnetUrl" -ForegroundColor Yellow
+Write-Host "  FastAPI AI    : $fastApiUrl" -ForegroundColor Yellow
+Write-Host "  Chat via .NET : http://localhost:5083/api/chat/message" -ForegroundColor Yellow
