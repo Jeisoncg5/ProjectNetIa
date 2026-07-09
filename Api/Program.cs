@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Pgvector.EntityFrameworkCore;
 using ProjectNetIa.Api.Configuration;
 using ProjectNetIa.Application.Interfaces;
 using ProjectNetIa.Infrastructure.Data;
@@ -8,7 +9,9 @@ using ProjectNetIa.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.UseVector()));
 
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();

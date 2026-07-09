@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectNetIa.Domain.Entities;
+using Pgvector.EntityFrameworkCore;
 
 namespace ProjectNetIa.Infrastructure.Data;
 
@@ -25,6 +26,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.HasPostgresExtension("vector");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
 }

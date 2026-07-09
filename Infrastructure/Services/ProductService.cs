@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Pgvector.EntityFrameworkCore;
 using ProjectNetIa.Application.DTOs.Products;
 using ProjectNetIa.Application.Interfaces;
 using ProjectNetIa.Domain.Entities;
 using ProjectNetIa.Infrastructure.Data;
+using ProjectNetIa.Infrastructure.Search;
 
 namespace ProjectNetIa.Infrastructure.Services;
 
@@ -27,12 +29,13 @@ public sealed class ProductService : IProductService
             throw new InvalidOperationException("El precio del producto debe ser mayor que cero.");
         }
 
-        var categoryExists = await _context.ProductCategories
-            .AnyAsync(category =>
+        var category = await _context.ProductCategories
+            .AsNoTracking()
+            .FirstOrDefaultAsync(category =>
                 category.Id == request.ProductCategoryId &&
                 category.IsActive);
 
-        if (!categoryExists)
+        if (category is null)
         {
             throw new InvalidOperationException("La categoria del producto no existe o esta inactiva.");
         }
@@ -44,6 +47,10 @@ public sealed class ProductService : IProductService
             Description = request.Description?.Trim(),
             Price = request.Price,
             IsActive = true,
+            Embedding = ProductEmbeddingGenerator.CreateForProduct(
+                category.Name,
+                request.Name.Trim(),
+                request.Description?.Trim()),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -290,22 +297,51 @@ public sealed class ProductService : IProductService
                 variant.Product != null &&
                 variant.Product.IsActive);
 
+        VectorSearchCandidate[]? semanticCandidates = null;
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
             var pattern = $"%{normalizedQuery}%";
+            var queryEmbedding = ProductEmbeddingGenerator.CreateForQuery(normalizedQuery);
 
-            variantsQuery = variantsQuery.Where(variant =>
-                EF.Functions.ILike(variant.Product!.Name, pattern) ||
-                (
-                    variant.Product.Description != null &&
-                    EF.Functions.ILike(variant.Product.Description, pattern)
-                ) ||
-                (
-                    variant.Product.ProductCategory != null &&
-                    EF.Functions.ILike(variant.Product.ProductCategory.Name, pattern)
-                ) ||
-                EF.Functions.ILike(variant.Sku, pattern)
-            );
+            semanticCandidates = await variantsQuery
+                .Select(variant => new VectorSearchCandidate
+                {
+                    ProductVariantId = variant.Id,
+                    ProductId = variant.ProductId,
+                    ProductName = variant.Product != null ? variant.Product.Name : string.Empty,
+                    Description = variant.Product != null ? variant.Product.Description : null,
+                    CategoryName = variant.Product != null && variant.Product.ProductCategory != null
+                        ? variant.Product.ProductCategory.Name
+                        : string.Empty,
+                    Sku = variant.Sku,
+                    SizeName = variant.Size != null ? variant.Size.Name : string.Empty,
+                    ColorName = variant.Color != null ? variant.Color.Name : string.Empty,
+                    Price = variant.Product != null ? variant.Product.Price : 0,
+                    Quantity = variant.Inventory != null ? variant.Inventory.Quantity : 0,
+                    IsAvailable = variant.Inventory != null && variant.Inventory.Quantity > 0,
+                    IsLexicalMatch =
+                        EF.Functions.ILike(variant.Product!.Name, pattern) ||
+                        (
+                            variant.Product.Description != null &&
+                            EF.Functions.ILike(variant.Product.Description, pattern)
+                        ) ||
+                        (
+                            variant.Product.ProductCategory != null &&
+                            EF.Functions.ILike(variant.Product.ProductCategory.Name, pattern)
+                        ) ||
+                        EF.Functions.ILike(variant.Sku, pattern),
+                    CosineDistance = variant.Product != null && variant.Product.Embedding != null
+                        ? variant.Product.Embedding.CosineDistance(queryEmbedding)
+                        : 1f
+                })
+                .Where(candidate => candidate.IsLexicalMatch || candidate.CosineDistance <= 0.45f)
+                .OrderBy(candidate => candidate.IsLexicalMatch ? 0 : 1)
+                .ThenBy(candidate => candidate.CosineDistance)
+                .ThenBy(candidate => candidate.ProductName)
+                .ThenBy(candidate => candidate.ColorName)
+                .ThenBy(candidate => candidate.SizeName)
+                .Take(20)
+                .ToArrayAsync();
         }
 
         if (!string.IsNullOrWhiteSpace(normalizedSize))
@@ -332,6 +368,26 @@ public sealed class ProductService : IProductService
             );
         }
 
+        if (semanticCandidates is not null)
+        {
+            return semanticCandidates
+                .Select(candidate => new ProductVariantSearchResponse
+                {
+                    ProductVariantId = candidate.ProductVariantId,
+                    ProductId = candidate.ProductId,
+                    ProductName = candidate.ProductName,
+                    Description = candidate.Description,
+                    CategoryName = candidate.CategoryName,
+                    Sku = candidate.Sku,
+                    SizeName = candidate.SizeName,
+                    ColorName = candidate.ColorName,
+                    Price = candidate.Price,
+                    Quantity = candidate.Quantity,
+                    IsAvailable = candidate.IsAvailable
+                })
+                .ToList();
+        }
+
         return await variantsQuery
             .OrderBy(variant => variant.Product!.Name)
             .ThenBy(variant => variant.Color!.Name)
@@ -353,6 +409,35 @@ public sealed class ProductService : IProductService
                 IsAvailable = variant.Inventory != null && variant.Inventory.Quantity > 0
             })
             .ToListAsync();
+    }
+
+    private sealed class VectorSearchCandidate
+    {
+        public Guid ProductVariantId { get; init; }
+
+        public Guid ProductId { get; init; }
+
+        public string ProductName { get; init; } = string.Empty;
+
+        public string? Description { get; init; }
+
+        public string CategoryName { get; init; } = string.Empty;
+
+        public string Sku { get; init; } = string.Empty;
+
+        public string SizeName { get; init; } = string.Empty;
+
+        public string ColorName { get; init; } = string.Empty;
+
+        public decimal Price { get; init; }
+
+        public int Quantity { get; init; }
+
+        public bool IsAvailable { get; init; }
+
+        public bool IsLexicalMatch { get; init; }
+
+        public double CosineDistance { get; init; }
     }
 
     private async Task<ProductVariantResponse?> GetProductVariantByIdAsync(Guid id)

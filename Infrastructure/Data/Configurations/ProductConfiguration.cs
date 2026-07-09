@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectNetIa.Domain.Entities;
+using ProjectNetIa.Infrastructure.Search;
 
 namespace ProjectNetIa.Infrastructure.Data.Configurations;
 
@@ -24,8 +25,15 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         entity.Property(e => e.IsActive)
             .IsRequired();
 
+        entity.Property(e => e.Embedding)
+            .HasColumnType($"vector({ProductEmbeddingGenerator.Dimension})");
+
         entity.Property(e => e.CreatedAt)
             .IsRequired();
+
+        entity.HasIndex(e => e.Embedding)
+            .HasMethod("hnsw")
+            .HasOperators("vector_cosine_ops");
 
         entity.HasOne(e => e.ProductCategory)
             .WithMany(e => e.Products)

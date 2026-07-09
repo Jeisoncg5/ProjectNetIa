@@ -1,3 +1,5 @@
+using Pgvector;
+
 namespace ProjectNetIa.Domain.Entities;
 
 public sealed class Product
@@ -13,6 +15,8 @@ public sealed class Product
     public decimal Price { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    public Vector? Embedding { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

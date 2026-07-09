@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectNetIa.Domain.Entities;
+using ProjectNetIa.Infrastructure.Search;
 
 namespace ProjectNetIa.Infrastructure.Data;
 
@@ -12,6 +13,9 @@ public static class StoreCatalogSeeder
         var existingNames = await context.Products
             .Select(product => product.Name)
             .ToListAsync();
+
+        var categoryNames = await context.ProductCategories
+            .ToDictionaryAsync(category => category.Id, category => category.Name);
 
         var colorIds = await context.Colors
             .ToDictionaryAsync(color => color.Name, color => color.Id);
@@ -35,6 +39,10 @@ public static class StoreCatalogSeeder
                 Description = seedProduct.Description,
                 Price = seedProduct.Price,
                 IsActive = true,
+                Embedding = ProductEmbeddingGenerator.CreateForProduct(
+                    categoryNames[seedProduct.CategoryId],
+                    seedProduct.Name,
+                    seedProduct.Description),
                 CreatedAt = DateTime.UtcNow,
             };
 
@@ -64,7 +72,31 @@ public static class StoreCatalogSeeder
             context.Products.Add(product);
         }
 
+        await SyncProductEmbeddingsAsync(context, categoryNames);
         await context.SaveChangesAsync();
+    }
+
+    private static async Task SyncProductEmbeddingsAsync(
+        ApplicationDbContext context,
+        IReadOnlyDictionary<int, string> categoryNames)
+    {
+        var productsToSync = await context.Products
+            .Include(product => product.ProductCategory)
+            .Where(product =>
+                product.Embedding == null ||
+                product.Embedding.ToArray().Length != ProductEmbeddingGenerator.Dimension)
+            .ToListAsync();
+
+        foreach (var product in productsToSync)
+        {
+            var categoryName = product.ProductCategory?.Name
+                ?? categoryNames.GetValueOrDefault(product.ProductCategoryId, string.Empty);
+
+            product.Embedding = ProductEmbeddingGenerator.CreateForProduct(
+                categoryName,
+                product.Name,
+                product.Description);
+        }
     }
 
     private static List<SeedProduct> BuildCatalog(
