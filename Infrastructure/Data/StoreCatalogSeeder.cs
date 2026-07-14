@@ -80,12 +80,13 @@ public static class StoreCatalogSeeder
         ApplicationDbContext context,
         IReadOnlyDictionary<int, string> categoryNames)
     {
-        var productsToSync = await context.Products
-            .Include(product => product.ProductCategory)
-            .Where(product =>
-                product.Embedding == null ||
-                product.Embedding.ToArray().Length != ProductEmbeddingGenerator.Dimension)
-            .ToListAsync();
+        var productsToSync = (await context.Products
+        .Include(product => product.ProductCategory)
+        .ToListAsync())
+    .Where(product =>
+        product.Embedding == null ||
+        product.Embedding.ToArray().Length != ProductEmbeddingGenerator.Dimension)
+    .ToList();
 
         foreach (var product in productsToSync)
         {
