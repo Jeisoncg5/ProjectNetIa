@@ -16,5 +16,9 @@ public sealed class InvoiceResponse
 
     public decimal Total { get; set; }
 
+    public string? CustomerName { get; set; }
+
+    public string? CustomerDocument { get; set; }
+
     public List<InvoiceItemResponse> Items { get; set; } = new();
 }

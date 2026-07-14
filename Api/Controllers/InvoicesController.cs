@@ -21,6 +21,13 @@ public sealed class InvoicesController : ControllerBase
         return Ok(invoices);
     }
 
+    [HttpGet("by-customer/{documentNumber}")]
+    public async Task<IActionResult> GetInvoicesByCustomerDocument(string documentNumber)
+    {
+        var invoices = await _invoiceService.GetInvoicesByCustomerDocumentAsync(documentNumber);
+        return Ok(invoices);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetInvoiceById(Guid id)
     {

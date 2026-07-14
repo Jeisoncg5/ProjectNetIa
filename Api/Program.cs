@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         npgsqlOptions => npgsqlOptions.UseVector()));
 
 builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
