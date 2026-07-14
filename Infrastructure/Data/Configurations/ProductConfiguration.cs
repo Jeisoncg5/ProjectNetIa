@@ -18,6 +18,9 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         entity.Property(e => e.Description)
             .HasMaxLength(500);
 
+        entity.Property(e => e.ImageUrl)
+            .HasMaxLength(500);
+
         entity.Property(e => e.Price)
             .HasColumnType("numeric(18,2)")
             .IsRequired();

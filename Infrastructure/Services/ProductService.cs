@@ -45,6 +45,9 @@ public sealed class ProductService : IProductService
             ProductCategoryId = request.ProductCategoryId,
             Name = request.Name.Trim(),
             Description = request.Description?.Trim(),
+            ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl)
+                ? null
+                : request.ImageUrl.Trim(),
             Price = request.Price,
             IsActive = true,
             Embedding = ProductEmbeddingGenerator.CreateForProduct(
@@ -208,6 +211,7 @@ public sealed class ProductService : IProductService
                     : string.Empty,
                 Name = product.Name,
                 Description = product.Description,
+                ImageUrl = product.ImageUrl,
                 Price = product.Price,
                 IsActive = product.IsActive,
                 Variants = product.ProductVariants
@@ -252,6 +256,7 @@ public sealed class ProductService : IProductService
                     : string.Empty,
                 Name = product.Name,
                 Description = product.Description,
+                ImageUrl = product.ImageUrl,
                 Price = product.Price,
                 IsActive = product.IsActive,
                 Variants = product.ProductVariants

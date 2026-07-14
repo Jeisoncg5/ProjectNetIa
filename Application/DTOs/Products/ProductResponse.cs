@@ -12,6 +12,8 @@ public sealed class ProductResponse
 
     public string? Description { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public decimal Price { get; set; }
 
     public bool IsActive { get; set; }

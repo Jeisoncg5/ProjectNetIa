@@ -21,12 +21,19 @@ La idea del proyecto es simular una tienda que desea modernizar su proceso comer
 
 Este proyecto hace parte de una solucion dividida en tres repositorios:
 
-1. `ProjectNetIa`
+1. **`ProjectNetIa`** (este repositorio)
    Backend de negocio en ASP.NET Core.
-2. `smartinventory-ai-core-main`
+2. [`smartinventory-ai-core-main`](https://github.com/Jeisoncg5/smartinventory-ai-core-main)
    Microservicio de IA en FastAPI, LangChain y LangGraph.
-3. `smartinventory-client`
+3. [`smartinventory-client`](https://github.com/Jeisoncg5/smartinventory-client)
    Frontend en React + TypeScript.
+
+Clonar los otros workspaces:
+
+```bash
+git clone https://github.com/Jeisoncg5/smartinventory-ai-core-main.git
+git clone https://github.com/Jeisoncg5/smartinventory-client.git
+```
 
 Flujo general:
 
@@ -132,7 +139,7 @@ La opcion recomendada para este proyecto es usar **Docker** con PostgreSQL + `pg
 
 Archivo incluido:
 
-- [docker-compose.pgvector.yml]
+- [`docker-compose.pgvector.yml`](./docker-compose.pgvector.yml)
 
 Configuracion actual del backend:
 
@@ -176,14 +183,14 @@ La API queda por defecto en:
 
 El backend no contiene el modelo de IA. En cambio:
 
-- recibe mensajes del frontend
-- los reenvia al microservicio FastAPI
+- recibe mensajes del frontend ([`smartinventory-client`](https://github.com/Jeisoncg5/smartinventory-client))
+- los reenvia al microservicio FastAPI ([`smartinventory-ai-core-main`](https://github.com/Jeisoncg5/smartinventory-ai-core-main))
 - recibe la respuesta estructurada
 - mantiene el contrato hacia React
 
 La configuracion del chatbot esta en:
 
-- Api/appsettings.Development.json
+- `Api/appsettings.Development.json`
 
 ## Scripts utiles
 
